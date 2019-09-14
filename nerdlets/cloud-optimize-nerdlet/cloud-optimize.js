@@ -1,16 +1,24 @@
 import React from 'react';
 import { NerdGraphQuery } from 'nr1';
-import { getCollection, writeDocument, accountsQuery, getInstanceData } from './utils';
+import { getCollection, writeDocument, accountsQuery, getInstanceData, makeId } from './utils';
 import { processSample, groupInstances } from './processor';
 import MenuBar from './components/menuBar'
 import HeaderCosts from './components/headerCosts'
 import AccountCards from './components/accountCards'
 import _ from 'lodash'
 
+var demoMap = {acc:{}, app: {}, host:{}, providerAccount: {}}
+
+function handleDemo(type, name){
+    if(!demoMap[type][name]) demoMap[type][name] = makeId(10)
+    return demoMap[type][name]
+}
+
 export default class CloudOptimize extends React.Component {
     constructor(props){
         super(props)
         this.state = { 
+            demo: false,
             loading: null,
             completedAccounts: 0,
             accounts: [],
@@ -60,6 +68,7 @@ export default class CloudOptimize extends React.Component {
     }
 
     async componentDidMount(){
+        if(window.location.ancestorOrigins && window.location.ancestorOrigins[0].includes("https://staging-one")) this.setState({demo:true})
         this.fetchNewRelicData()
     }
 
@@ -103,7 +112,7 @@ export default class CloudOptimize extends React.Component {
 
     fetchSamples(accounts){
         let tempInstanceData = []
-        let { config, awsPricing, completedAccounts } = this.state
+        let { config, awsPricing, completedAccounts, demo } = this.state
         accounts.forEach(async (account)=>{
             let results = await NerdGraphQuery.query({query: getInstanceData(account.id)})
             if(results.errors){
@@ -112,7 +121,14 @@ export default class CloudOptimize extends React.Component {
                 let systemSamples = (((((results || {}).data || {}).actor || {}).account || {}).system || {}).results || []
                 let networkSamples = (((((results || {}).data || {}).actor || {}).account || {}).network || {}).results || []
                 systemSamples.forEach((sample)=>{
-                    tempInstanceData.push(processSample(account, sample, config, networkSamples, awsPricing))
+                    let newSample = processSample(account, sample, config, networkSamples, awsPricing)
+                    if(demo){
+                        newSample.hostname = handleDemo("host", newSample.hostname)
+                        newSample.apmApplicationNames = handleDemo("app", newSample.apmApplicationNames)
+                        newSample.providerAccountName = handleDemo("providerAccount", newSample.providerAccountName)
+                        newSample.accountName = handleDemo("acc", newSample.accountName)
+                    }
+                    tempInstanceData.push(newSample)
                 })
                 await this.setState({"instanceData": tempInstanceData})
                 this.groupAndSort(tempInstanceData, "", "")
