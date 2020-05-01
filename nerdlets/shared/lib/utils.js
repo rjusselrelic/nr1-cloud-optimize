@@ -86,7 +86,11 @@ export const accountsWithData = async eventType => {
     /* eslint-enable */
     return [];
   }
-  return result.data.actor.accounts.filter(
-    a => a.reportingEventTypes.length > 0
-  );
+  return result.data.actor.accounts
+    .filter(
+      a => a.reportingEventTypes.length > 0
+    //TODO: Add "limit" config for top x accounts, or accounts like yyy
+    //Un-comment for top 60 accounts
+    //a => a.id < 1597835 
+    );
 };
