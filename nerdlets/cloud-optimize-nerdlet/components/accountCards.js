@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Card, Table, Icon, Dimmer, Loader, Segment } from 'semantic-ui-react';
 import OptimizationCandidates from './optimizationCandidates';
 import SnapshotCard from './snapshots/snapshotCard';
+import LoadingProgress from 'react-js-loading-progress-bar';
 
 export default class AccountCards extends React.Component {
   static propTypes = {
@@ -34,17 +35,13 @@ export default class AccountCards extends React.Component {
           minHeight: this.props.height
         }}
       >
-        <Dimmer active={isLoading}>
-          <Loader style={{ top: '150px' }} size="big">
-            Please be patient while we analyze your Accounts and Instances...{' '}
-            <br />
-            <br />
-            {this.props.completedAccounts} of {this.props.accounts} Accounts
-            Inspected <br />
-            <br />
-            {this.props.instances} Instances Inspected
-          </Loader>
-        </Dimmer>
+         <LoadingProgress  
+            className = "progress"
+            active={true}
+            total={this.props.accounts}
+            current={this.props.completedAccounts}
+            showCompact       
+        />
 
         <h2 style={{ display: noAccounts ? '' : 'none' }}>
           Unable to load accounts!
