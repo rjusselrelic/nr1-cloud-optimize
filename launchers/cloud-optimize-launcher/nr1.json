@@ -2,6 +2,6 @@
     "schemaType": "LAUNCHER",
     "id": "cloud-optimize-launcher",
     "description": "Cloud Optimizer",
-    "displayName": "Cloud Optimize",
+    "displayName": "LOCAL - Cloud Optimize",
     "rootNerdletId": "cloud-optimize-nerdlet"
 }
